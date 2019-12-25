@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include "jeu.h"
 
-
-char input[32];
+// TODO : Prendre en compte les minuscule aussi dans les menus
 
 int main(int argc, char *argv[]) {
-    do {
+    char input[32];
+    while (1) {
         clrscr();
         printf("Bienvenue dans le jeu des petits chevaux\n\nQue souhaitez-vous faire ?\n[1] Nouvelle partie\n[2] Charger une partie\n[3] Quitter\n\nChoix : ");
         getInput(input);
@@ -19,5 +19,5 @@ int main(int argc, char *argv[]) {
         } else {
             continue;
         }
-    } while (1);
+    }
 }

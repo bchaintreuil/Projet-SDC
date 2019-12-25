@@ -5,7 +5,8 @@
 #ifndef PROJET_SDC_JEU_H
 #define PROJET_SDC_JEU_H
 
-extern char input[32];
+#include <stdio.h>
+
 enum {
     NEW, LOAD
 };
@@ -14,16 +15,10 @@ typedef struct Horse { ;
 } Horse;
 
 typedef struct Player {
-    char id;
-    char *name;
+    char name;
     char isIA;
     Horse *horses[4];
 } Player;
-
-typedef struct State {
-    Player *players;
-    char *nbPlayers;
-} State;
 
 void clrscr(void);
 
@@ -33,16 +28,16 @@ int dice(void);
 
 void game(char mode);
 
-State *initGame(void);
-
 void loadSave(void);
 
 void saveGame(void);
 
-void gc(void);
+void gc(void *arg1, ...);
 
 char fexists(char *filename);
 
 void delay(int seconds);
+
+void *cmalloc(size_t size);
 
 #endif //PROJET_SDC_JEU_H

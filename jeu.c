@@ -3,17 +3,15 @@
 //
 
 #include "jeu.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <stdarg.h>
 
 #ifdef WIN32
 #include <Windows.h>
 #else
-
 #include <unistd.h>
-
 #endif
 
 #define SAVE "save.bin"
@@ -34,9 +32,12 @@ void delay(int seconds) {
 #endif
 }
 
-void getInput(char *input) {
+void getInput(char *input) { // FIXME : Input var global conflict with function var;
+    fflush(stdin);
     input = fgets(input, sizeof(input) + 1, stdin);
-    input[strlen(input) - 1] = '\0';
+    if (input[strlen(input) - 1] == '\n') {
+        input[strlen(input) - 1] = '\0';
+    }
 }
 
 int dice() {
@@ -54,8 +55,12 @@ char fexists(char *filename) {
 
 void game(char mode) {
     srand(time(NULL));
+
     FILE *save;
-    State *gameState = initGame();
+    char input[32] = "";
+    Player *players; // TODO: Alloc dyn nb joueurs
+    char nbPlayers;
+
     switch (mode) {
         case NEW:
             if (fexists(SAVE)) {
@@ -63,6 +68,7 @@ void game(char mode) {
                     printf("Une sauvegarde d'une précèdente partie existe déjà ! Souhaitez-vous l'écraser ?\n\n[O] Oui\n[N] Non\n\nChoix : ");
                     getInput(input);
                     if (!strcmp(input, "O")) {
+                        save = fopen(SAVE, "wb"); // TODO : Penser à close et checker l'ouverture !
                         break;
                     } else if (!strcmp(input, "N")) {
                         return;
@@ -70,8 +76,38 @@ void game(char mode) {
                         clrscr();
                     }
                 }
+                while (1) {
+                    printf("Nombre de Joueurs [1-4] : ");
+                    getInput(input);
+                    if (!strcmp(input, "1") || !strcmp(input, "2") || !strcmp(input, "3") || !strcmp(input, "4")) {
+                        nbPlayers = input[0] - '0';
+                        players = cmalloc(nbPlayers * sizeof(Player));
+                        break;
+                    }
+                    clrscr();
+                }
+                while (1) {
+                    printf("Jouer avec un joueur autonome ? \n\n[O] Oui\n[N] Non\n\nChoix : ");
+                    getInput(input);
+                    if (!strcmp(input, "O")) {
+                        players[nbPlayers - 1].isIA = 1;
+                        break;
+                    } else if (!strcmp(input, "N")) {
+                        break;
+                    } else {
+                        clrscr();
+                    }
+                }
+                for (int i = 1; i <= nbPlayers; i++) {
+                    if (players[i - 1].isIA) {
+                        break;
+                    }
+                    printf("Nom du joueur #%d : ", i);
+                    getInput(input);
+                    players[i - 1].name = input;
+                }
             }
-            save = fopen(SAVE, "wb"); // TODO : Penser à close !
+            exit(0);
             break;
         case LOAD:
             if (!fexists(SAVE)) {
@@ -80,22 +116,10 @@ void game(char mode) {
                 delay(3);
                 return;
             }
-            save = fopen(SAVE, "rb+"); // TODO : Penser à close !
+            save = fopen(SAVE, "rb+"); // TODO : Penser à close et checker l'ouverture !
             loadSave();
             break;
     }
-}
-
-State *initGame() {
-    State *gameState = malloc(sizeof(State));
-    while (1) {
-        clrscr();
-        printf("Combien de joueurs ? ([1-4]) : ");
-        getInput(gameState->nbPlayers);
-        printf("%c", gameState->nbPlayers);
-        exit(0);
-    }
-    return &gameState;
 }
 
 void loadSave() {
@@ -106,6 +130,26 @@ void saveGame() {
     ;
 }
 
-void gc() {
-    ;
+void gc(void *arg1, ...) { // Un example de call : gc(arg1, ..., NULL);
+    va_list args;
+    void *element;
+    free(arg1);
+    va_start(args, arg1);
+    while ((element = va_arg(args, void*)) != NULL) {
+        free(element);
+    }
+    va_end(args);
+}
+
+void *cmalloc(size_t size) {
+    void *pointer;
+    pointer = malloc(size);
+    if (pointer) {
+        return pointer;
+    }
+    clrscr(); // TODO: Rise exception (Close stream file, free ram, etc...)
+    printf("Erreur d'allocation : Mémoire vive insuffisante !");
+    delay(3);
+    fflush(stdout);
+    exit(-1);
 }
