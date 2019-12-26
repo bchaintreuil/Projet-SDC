@@ -11,18 +11,22 @@ enum {
     NEW, LOAD
 };
 
-typedef struct Horse { ;
+typedef struct Horse {
+    char stair;
+    char isOut;
+    char steps;
 } Horse;
 
 typedef struct Player {
-    char name;
+    char *name;
     char isIA;
-    Horse *horses[4];
+    char hisTurn;
+    Horse *horses;
 } Player;
 
 void clrscr(void);
 
-void getInput(char *input);
+char *getInput(void);
 
 int dice(void);
 
@@ -37,7 +41,5 @@ void gc(void *arg1, ...);
 char fexists(char *filename);
 
 void delay(int seconds);
-
-void *cmalloc(size_t size);
 
 #endif //PROJET_SDC_JEU_H

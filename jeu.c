@@ -15,6 +15,7 @@
 #endif
 
 #define SAVE "save.bin"
+const char startPos[] = {0, 14, 28, 42};
 
 void clrscr() {
 #ifdef WIN32
@@ -32,12 +33,24 @@ void delay(int seconds) {
 #endif
 }
 
-void getInput(char *input) { // FIXME : Input var global conflict with function var;
-    fflush(stdin);
-    input = fgets(input, sizeof(input) + 1, stdin);
-    if (input[strlen(input) - 1] == '\n') {
-        input[strlen(input) - 1] = '\0';
+// TODO: Penser à free input à la fermeture du jeu (Main - done; & game)
+char *getInput() { // TODO: Raise except in case of alloc failure
+    int i = 0;
+    char c, *input;
+    input = (char *) malloc(sizeof(char));
+
+    if (input == NULL) {
+        printf("Could not allocate memory!");
+        exit(1);
     }
+
+    fflush(stdin);
+    while ((c = getchar()) != '\n') {
+        realloc(input, (sizeof(char)));
+        input[i++] = c;
+    }
+    input[i] = '\0';
+    return input;
 }
 
 int dice() {
@@ -57,55 +70,59 @@ void game(char mode) {
     srand(time(NULL));
 
     FILE *save;
-    char input[32] = "";
+    char *input;
+
+    /* Variables d'état */
     Player *players; // TODO: Alloc dyn nb joueurs
     char nbPlayers;
+    Horse *board[56];
+    /* */
 
     switch (mode) {
         case NEW:
             if (fexists(SAVE)) {
                 while (1) {
                     printf("Une sauvegarde d'une précèdente partie existe déjà ! Souhaitez-vous l'écraser ?\n\n[O] Oui\n[N] Non\n\nChoix : ");
-                    getInput(input);
+                    input = getInput();
                     if (!strcmp(input, "O")) {
                         save = fopen(SAVE, "wb"); // TODO : Penser à close et checker l'ouverture !
                         break;
                     } else if (!strcmp(input, "N")) {
                         return;
-                    } else {
-                        clrscr();
-                    }
-                }
-                while (1) {
-                    printf("Nombre de Joueurs [1-4] : ");
-                    getInput(input);
-                    if (!strcmp(input, "1") || !strcmp(input, "2") || !strcmp(input, "3") || !strcmp(input, "4")) {
-                        nbPlayers = input[0] - '0';
-                        players = cmalloc(nbPlayers * sizeof(Player));
-                        break;
                     }
                     clrscr();
                 }
-                while (1) {
-                    printf("Jouer avec un joueur autonome ? \n\n[O] Oui\n[N] Non\n\nChoix : ");
-                    getInput(input);
-                    if (!strcmp(input, "O")) {
-                        players[nbPlayers - 1].isIA = 1;
-                        break;
-                    } else if (!strcmp(input, "N")) {
-                        break;
-                    } else {
-                        clrscr();
-                    }
+            }
+            while (1) {
+                printf("Nombre de Joueurs [2-4] : ");
+                input = getInput();
+                if (!strcmp(input, "2") || !strcmp(input, "3") || !strcmp(input, "4")) {
+                    nbPlayers = input[0] - '0';
+                    players = calloc(nbPlayers, sizeof(Player));
+                    break;
                 }
-                for (int i = 1; i <= nbPlayers; i++) {
-                    if (players[i - 1].isIA) {
-                        break;
-                    }
-                    printf("Nom du joueur #%d : ", i);
-                    getInput(input);
-                    players[i - 1].name = input;
+                clrscr();
+            }
+            while (1) {
+                printf("Jouer avec un joueur autonome ? \n\n[O] Oui\n[N] Non\n\nChoix : ");
+                input = getInput();
+                if (!strcmp(input, "O")) {
+                    players[nbPlayers - 1].isIA = 1;
+                    break;
+                } else if (!strcmp(input, "N")) {
+                    break;
                 }
+                clrscr();
+            }
+            for (int i = 0; i < nbPlayers; i++) {
+                if (players[i].isIA) {
+                    players[i].name = "C-3PO";
+                    break;
+                }
+                printf("Nom du joueur #%d : ", i + 1); // TODO: Nom vide
+                input = getInput();
+                players[i].name = input;
+                players[i].horses = calloc(4, sizeof(Horse));
             }
             exit(0);
             break;
@@ -139,17 +156,4 @@ void gc(void *arg1, ...) { // Un example de call : gc(arg1, ..., NULL);
         free(element);
     }
     va_end(args);
-}
-
-void *cmalloc(size_t size) {
-    void *pointer;
-    pointer = malloc(size);
-    if (pointer) {
-        return pointer;
-    }
-    clrscr(); // TODO: Rise exception (Close stream file, free ram, etc...)
-    printf("Erreur d'allocation : Mémoire vive insuffisante !");
-    delay(3);
-    fflush(stdout);
-    exit(-1);
 }
