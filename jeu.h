@@ -14,14 +14,14 @@ enum {
 typedef struct Horse {
     char stair;
     char isOut;
-    char steps;
+    char pos;
 } Horse;
 
 typedef struct Player {
     char *name;
     char isIA;
     char hisTurn;
-    Horse *horses;
+    Horse horses[4];
 } Player;
 
 void clrscr(void);
@@ -32,9 +32,9 @@ int dice(void);
 
 void game(char mode);
 
-void loadSave(void);
+void loadSave(FILE *save, char *nbPlayers, Player **players, Horse *board[]);
 
-void saveGame(void);
+void saveGame(FILE *save, char nbPlayers, Player *players);
 
 void gc(void *arg1, ...);
 

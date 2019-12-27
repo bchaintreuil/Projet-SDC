@@ -18,8 +18,6 @@ int main(int argc, char *argv[]) {
         } else if (!strcmp(input, "3")) {
             free(input);
             return 0;
-        } else {
-            continue;
         }
     }
 }

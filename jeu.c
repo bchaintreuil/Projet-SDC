@@ -16,6 +16,7 @@
 
 #define SAVE "save.bin"
 const char startPos[] = {0, 14, 28, 42};
+const char endPos[] = {55, 13, 27, 41};
 
 void clrscr() {
 #ifdef WIN32
@@ -33,7 +34,7 @@ void delay(int seconds) {
 #endif
 }
 
-// TODO: Penser à free input à la fermeture du jeu (Main - done; & game)
+// TODO: Penser à free input à la fermeture du jeu (Main - done; & game) ainsi que player.name
 char *getInput() { // TODO: Raise except in case of alloc failure
     int i = 0;
     char c, *input;
@@ -71,11 +72,11 @@ void game(char mode) {
 
     FILE *save;
     char *input;
+    Horse *board[56] = {NULL};
 
     /* Variables d'état */
-    Player *players; // TODO: Alloc dyn nb joueurs
     char nbPlayers;
-    Horse *board[56];
+    Player *players; // TODO: Alloc dyn nb joueurs
     /* */
 
     switch (mode) {
@@ -98,7 +99,7 @@ void game(char mode) {
                 input = getInput();
                 if (!strcmp(input, "2") || !strcmp(input, "3") || !strcmp(input, "4")) {
                     nbPlayers = input[0] - '0';
-                    players = calloc(nbPlayers, sizeof(Player));
+                    players = (Player *) calloc(nbPlayers, sizeof(Player));
                     break;
                 }
                 clrscr();
@@ -116,15 +117,14 @@ void game(char mode) {
             }
             for (int i = 0; i < nbPlayers; i++) {
                 if (players[i].isIA) {
-                    players[i].name = "C-3PO";
+                    players[i].name = "C-3PO"; // FIXME: strcpy();
                     break;
                 }
                 printf("Nom du joueur #%d : ", i + 1); // TODO: Nom vide
                 input = getInput();
                 players[i].name = input;
-                players[i].horses = calloc(4, sizeof(Horse));
             }
-            exit(0);
+            saveGame(save, nbPlayers, players);
             break;
         case LOAD:
             if (!fexists(SAVE)) {
@@ -134,17 +134,41 @@ void game(char mode) {
                 return;
             }
             save = fopen(SAVE, "rb+"); // TODO : Penser à close et checker l'ouverture !
-            loadSave();
+            loadSave(save, &nbPlayers, &players, board);
             break;
     }
+    /* Début du jeu */
 }
 
-void loadSave() {
-    ;
+void loadSave(FILE *save, char *nbPlayers, Player **players,
+              Horse *board[]) { // TODO: return boolean in case of success/fail
+    size_t stringSize;
+    fread(nbPlayers, sizeof(char), 1, save);
+    *players = (Player *) calloc(*nbPlayers, sizeof(Player));
+    fread(*players, sizeof(Player), *nbPlayers, save);
+    for (int i = 0; i < *nbPlayers; i++) {
+        fread(&stringSize, sizeof(size_t), 1, save);
+        (*players)[i].name = (char *) calloc(sizeof(char), stringSize);
+        fread((*players)[i].name, sizeof(char), stringSize, save);
+        for (int j = 0; j < 4; j++) {
+            if (((*players)[i].horses[j]).isOut) {
+                board[((*players)[i].horses[j]).pos] = &((*players)[i].horses[j]);
+            }
+        }
+    }
+    fflush(save);
 }
 
-void saveGame() {
-    ;
+void saveGame(FILE *save, char nbPlayers, Player *players) { // TODO: return boolean in case of success/fail
+    size_t stringSize;
+    fwrite(&nbPlayers, sizeof(char), 1, save);
+    fwrite(players, sizeof(Player), nbPlayers, save);
+    for (int i = 0; i < nbPlayers; i++) {
+        stringSize = strlen(players[i].name);
+        fwrite(&stringSize, sizeof(size_t), 1, save);
+        fwrite(players[i].name, sizeof(char), stringSize, save);
+    }
+    fflush(save);
 }
 
 void gc(void *arg1, ...) { // Un example de call : gc(arg1, ..., NULL);
