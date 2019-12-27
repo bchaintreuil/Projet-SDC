@@ -11,10 +11,14 @@
 #ifdef WIN32
 #include <Windows.h>
 #else
+
 #include <unistd.h>
+
 #endif
 
 #define SAVE "save.bin"
+#define IA_NAME "C-3PO"
+
 const char startPos[] = {0, 14, 28, 42};
 const char endPos[] = {55, 13, 27, 41};
 
@@ -117,10 +121,11 @@ void game(char mode) {
             }
             for (int i = 0; i < nbPlayers; i++) {
                 if (players[i].isIA) {
-                    players[i].name = "C-3PO"; // FIXME: strcpy();
+                    players[i].name = (char *) calloc(strlen(IA_NAME), sizeof(char));
+                    strcpy(players[i].name, IA_NAME);
                     break;
                 }
-                printf("Nom du joueur #%d : ", i + 1); // TODO: Nom vide
+                printf("Nom du joueur #%d : ", i + 1); // TODO: Nom vide et doublons
                 input = getInput();
                 players[i].name = input;
             }
