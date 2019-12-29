@@ -12,6 +12,8 @@ enum {
 };
 
 typedef struct Horse {
+    char playerID;
+    char horseID;
     char stair;
     char isOut;
     char pos;
@@ -19,7 +21,7 @@ typedef struct Horse {
 
 typedef struct Player {
     char *name;
-    char isIA;
+    char isNPC;
     char hisTurn;
     Horse horses[4];
 } Player;
@@ -41,5 +43,9 @@ void gc(void *arg1, ...);
 char fexists(char *filename);
 
 void delay(int seconds);
+
+void displayBoard(char nbPlayer, Player *players, Horse *board[]);
+
+char *scat(const char *s1, const char *s2);
 
 #endif //PROJET_SDC_JEU_H
