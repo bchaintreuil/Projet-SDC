@@ -169,18 +169,8 @@ void game(char mode) {
     }
 
 /* Début du jeu */
-    board[0] = &(players[0].horses[0]);
+    board[10] = &players[0].horses[0];
     displayBoard(nbPlayers, players, board);
-    sleep(1);
-    clrscr();
-    for (int i = 1; i < 56; i++) {
-        board[i] = board[i - 1];
-        board[i - 1] = NULL;
-        displayBoard(nbPlayers, players, board);
-        sleep(1);
-        clrscr();
-    }
-
 }
 
 void loadSave(FILE *save, char *nbPlayers, Player **players,
@@ -270,6 +260,8 @@ void displayBoard(char nbPlayer, Player *players, Horse *board[]) {
     /* Affichage des écuries */
     char *foo; // TODO: Need to free foo at each scat ?
     char bar[2] = {0};
+    char found = 0;
+
     printf("Écuries :\n");
     foo = calloc(1, sizeof(char));
     for (int i = 0; i < nbPlayer; i++) {
@@ -299,17 +291,37 @@ void displayBoard(char nbPlayer, Player *players, Horse *board[]) {
 
     /* Affichage du plateau */
     printf("Plateau :\n");
-    for (int i = 0; i < 56; i++) {
-        if (board[i] != NULL) {
-            *(ptrBoard[i] - 1) = 'P';
-            *(ptrBoard[i]) = board[i]->horseID + 1 + '0';
-        } else {
-            *(ptrBoard[i]) = '#';
-        }
-    }
 
     for (int i = 0; i < 17; i++) {
-        printf("%s", dpBoard[i]);
-    }
+        foo = calloc(1, sizeof(char));
+        for (int j = 0; j < 52; j++) {
+            bar[0] = dpBoard[i][j];
+            if (bar[0] == '\n') { // Si on est sur une fin de ligne
+                printf("%s\n", foo);
+                break;
+            } else if (bar[0] == 0) { // Si Pos de joueurs
+                for (int k = 0; k < 56; k++) {
+                    if (&dpBoard[i][j] == ptrBoard[k] && board[k] != NULL) {
+                        foo = scat(foo, playerColor[board[k]->playerID]);
+                        foo = scat(foo, "P");
+                        bar[0] = board[k]->horseID + 1 + '0';
+                        foo = scat(foo, bar);
+                        foo = scat(foo, ANSI_COLOR_RESET);
+                        found++;
+                        break;
+                    }
+                }
+                if (!found) {
+                    foo = scat(foo, "#");
+                } else {
+                    found = 0;
+                    j++;
+                }
+            } else { // Autre char.
 
+                foo = scat(foo, bar);
+            }
+        }
+        free(foo);
+    }
 }
