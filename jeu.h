@@ -44,7 +44,7 @@ char fexists(char *filename);
 
 void delay(int seconds);
 
-void displayBoard(char nbPlayer, Player *players, Horse *board[]);
+void displayBoard(char nbPlayer, Player *players, Horse *board[], Horse *stairs[4][6]);
 
 char *scat(const char *s1, const char *s2);
 

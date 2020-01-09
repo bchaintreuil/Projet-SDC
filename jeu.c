@@ -86,6 +86,10 @@ void game(char mode) {
     FILE *save;
     char *input;
     Horse *board[56] = {NULL};
+    Horse *stairs[4][6] = {{NULL},
+                           {NULL},
+                           {NULL},
+                           {NULL}};
     char NPCAlreadySet = 0;
 
     /* Variables d'état */
@@ -169,8 +173,6 @@ void game(char mode) {
     }
 
 /* Début du jeu */
-    board[10] = &players[0].horses[0];
-    displayBoard(nbPlayers, players, board);
 }
 
 void loadSave(FILE *save, char *nbPlayers, Player **players,
@@ -223,23 +225,23 @@ char *scat(const char *s1, const char *s2) {
     return result;
 }
 
-void displayBoard(char nbPlayer, Player *players, Horse *board[]) {
+void displayBoard(char nbPlayer, Player *players, Horse *board[], Horse *stairs[4][6]) {
     char dpBoard[17][52] = {
             {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 65, 66, 32, 68, 66, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
             {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 49, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 50, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 51, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 52, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 53, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {68, 74, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 54, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 32, 10},
-            {65, 74, 32, 32, 0,  32, 32, 49, 32, 32, 50, 32, 32, 51, 32, 32, 52, 32, 32, 53, 32, 32, 54, 32, 32, 88, 32, 32, 54, 32, 32, 53, 32, 32, 52, 32, 32, 51, 32, 32, 50, 32, 32, 49, 32, 32, 0,  32, 65, 82, 10},
-            {32, 32, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 54, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 68, 82, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 53, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 52, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 51, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 50, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
-            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 49, 32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {68, 74, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 32, 10},
+            {65, 74, 32, 32, 0,  32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 88, 32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 1,  32, 32, 0,  32, 65, 82, 10},
+            {32, 32, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 68, 82, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
+            {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 1,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
             {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0,  32, 32, 0,  32, 32, 0,  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10},
             {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 68, 86, 32, 65, 86, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 10}
     };
@@ -256,72 +258,130 @@ void displayBoard(char nbPlayer, Player *players, Horse *board[]) {
                         &dpBoard[7][13], &dpBoard[7][16], &dpBoard[7][19], &dpBoard[7][22], &dpBoard[6][22],
                         &dpBoard[5][22], &dpBoard[4][22], &dpBoard[3][22],
                         &dpBoard[2][22], &dpBoard[1][22], &dpBoard[1][25]};
+    char *ptrStairs[4][6] = {
+            {&dpBoard[2][25],  &dpBoard[3][25],  &dpBoard[4][25],  &dpBoard[5][25],  &dpBoard[6][25],  &dpBoard[7][25]},
+            {&dpBoard[8][43],  &dpBoard[8][40],  &dpBoard[8][37],  &dpBoard[8][34],  &dpBoard[8][31],  &dpBoard[8][28]},
+            {&dpBoard[14][25], &dpBoard[13][25], &dpBoard[12][25], &dpBoard[11][25], &dpBoard[10][25], &dpBoard[9][25]},
+            {&dpBoard[8][7],   &dpBoard[8][10],  &dpBoard[8][13],  &dpBoard[8][16],  &dpBoard[8][19],  &dpBoard[8][22]}
+    };
+
+    char *currentLine; // TODO: Need to free currentLine at each scat ?
+    char charBuffer[2] = {0};
+    char found = 0;
+    char color = 0;
 
     /* Affichage des écuries */
-    char *foo; // TODO: Need to free foo at each scat ?
-    char bar[2] = {0};
-    char found = 0;
-
     printf("Écuries :\n");
-    foo = calloc(1, sizeof(char));
+    currentLine = calloc(1, sizeof(char));
     for (int i = 0; i < nbPlayer; i++) {
-        foo = scat(foo, playerColor[i]);
-        foo = scat(foo, players[i].name);
+        currentLine = scat(currentLine, playerColor[i]);
+        currentLine = scat(currentLine, players[i].name);
         if (players[i].isNPC) {
-            foo = scat(foo, " (NPC)");
+            currentLine = scat(currentLine, " (NPC)");
         }
-        foo = scat(foo, " : ");
+        currentLine = scat(currentLine, " : ");
         for (char j = 0; j < 4; j++) {
             if (!(players[i].horses[j]).isOut) {
-                foo = scat(foo, "P");
-                bar[0] = (players[i].horses[j]).horseID + 1 + '0';
-                foo = scat(foo, bar);
-                foo = scat(foo, " ");
+                currentLine = scat(currentLine, "P");
+                charBuffer[0] = (players[i].horses[j]).horseID + 1 + '0';
+                currentLine = scat(currentLine, charBuffer);
+                currentLine = scat(currentLine, " ");
             }
         }
         if (i != nbPlayer - 1) {
-            foo = scat(foo, ANSI_COLOR_RESET);
-            foo = scat(foo, "- ");
+            currentLine = scat(currentLine, ANSI_COLOR_RESET);
+            currentLine = scat(currentLine, "- ");
         }
     }
-    foo = scat(foo, ANSI_COLOR_RESET);
-    free(foo);
-    printf("%s\n\n", foo);
+    currentLine = scat(currentLine, ANSI_COLOR_RESET);
+    free(currentLine);
+    printf("%s\n\n", currentLine);
     /* *********** */
 
     /* Affichage du plateau */
     printf("Plateau :\n");
-
     for (int i = 0; i < 17; i++) {
-        foo = calloc(1, sizeof(char));
+        currentLine = calloc(1, sizeof(char));
         for (int j = 0; j < 52; j++) {
-            bar[0] = dpBoard[i][j];
-            if (bar[0] == '\n') { // Si on est sur une fin de ligne
-                printf("%s\n", foo);
-                break;
-            } else if (bar[0] == 0) { // Si Pos de joueurs
-                for (int k = 0; k < 56; k++) {
-                    if (&dpBoard[i][j] == ptrBoard[k] && board[k] != NULL) {
-                        foo = scat(foo, playerColor[board[k]->playerID]);
-                        foo = scat(foo, "P");
-                        bar[0] = board[k]->horseID + 1 + '0';
-                        foo = scat(foo, bar);
-                        foo = scat(foo, ANSI_COLOR_RESET);
-                        found++;
-                        break;
+            charBuffer[0] = dpBoard[i][j];
+            switch (charBuffer[0]) {
+                case '\n':
+                    printf("%s\n", currentLine);
+                    break;
+                case 0:
+                    for (int k = 0; k < 56; k++) {
+                        if (&dpBoard[i][j] == ptrBoard[k] && board[k] != NULL) {
+                            currentLine = scat(currentLine, playerColor[board[k]->playerID]);
+                            currentLine = scat(currentLine, "P");
+                            charBuffer[0] = board[k]->horseID + 1 + '0';
+                            currentLine = scat(currentLine, charBuffer);
+                            currentLine = scat(currentLine, ANSI_COLOR_RESET);
+                            found++;
+                            break;
+                        }
                     }
-                }
-                if (!found) {
-                    foo = scat(foo, "#");
-                } else {
-                    found = 0;
-                    j++;
-                }
-            } else { // Autre char.
-
-                foo = scat(foo, bar);
+                    if (!found) {
+                        for (int k = 0; k < 56; k++) {
+                            if (&dpBoard[i][j] == ptrBoard[k]) {
+                                color = (k + 1) / 14;
+                                if (color == 4) {
+                                    color = 0;
+                                }
+                                currentLine = scat(currentLine, playerColor[color]);
+                                currentLine = scat(currentLine, "#");
+                                currentLine = scat(currentLine, ANSI_COLOR_RESET);
+                                break;
+                            }
+                        }
+                    } else {
+                        found = 0;
+                        j++;
+                    }
+                    break;
+                case 1:
+                    for (int k = 0; k < 4; k++) {
+                        for (int l = 0; l < 6; l++) {
+                            if (&dpBoard[i][j] == ptrStairs[k][l] && stairs[k][l] != NULL) {
+                                currentLine = scat(currentLine, playerColor[k]);
+                                currentLine = scat(currentLine, "P");
+                                charBuffer[0] = stairs[k][l]->horseID + 1 + '0';
+                                currentLine = scat(currentLine, charBuffer);
+                                currentLine = scat(currentLine, ANSI_COLOR_RESET);
+                                found++;
+                                break;
+                            }
+                        }
+                        if (found) {
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        for (int k = 0; k < 4; k++) {
+                            for (int l = 0; l < 6; l++) {
+                                if (&dpBoard[i][j] == ptrStairs[k][l]) {
+                                    currentLine = scat(currentLine, playerColor[k]);
+                                    charBuffer[0] = l + 1 + '0';
+                                    currentLine = scat(currentLine, charBuffer);
+                                    currentLine = scat(currentLine, ANSI_COLOR_RESET);
+                                    found++;
+                                    break;
+                                }
+                            }
+                            if (found) {
+                                found = 0;
+                                break;
+                            }
+                        }
+                    } else {
+                        found = 0;
+                        j++;
+                    }
+                    break;
+                default:
+                    currentLine = scat(currentLine, charBuffer);
+                    break;
             }
         }
-        free(foo);
+        free(currentLine);
     }
 }
